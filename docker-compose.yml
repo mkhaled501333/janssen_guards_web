@@ -11,7 +11,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      - "3307:3306"  # External port 3307, internal port 3306 (backend uses service name 'db')
+      - "3308:3306"  # External port 3308, internal port 3306 (backend uses service name 'db')
     command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     healthcheck:
