@@ -1,0 +1,164 @@
+.reportTable {
+  width: 100%;
+  padding: 8px;
+  background: white;
+  color: #000000;
+  direction: rtl;
+  font-family: 'HacenTunisia', Arial, sans-serif;
+}
+
+.dateHeader {
+  font-size: 10px;
+  text-decoration: underline;
+  text-align: center;
+  margin-bottom: 5px;
+  width: 100%;
+  padding: 8px 0;
+  font-weight: 500;
+  color: #000000;
+}
+
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.columnsWrapper {
+  display: flex;
+  flex-direction: row;
+  min-width: fit-content;
+}
+
+.pointColumn {
+  min-width: 140px;
+  width: 140px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 3px solid transparent;
+}
+
+.pointColumn:not(:last-child) {
+  border-right: 3px solid #f5f5f5;
+}
+
+.pointHeader {
+  background-color: #e5e5e5;
+  border: 1px solid #000000;
+  padding: 8px 4px;
+  font-size: 16px;
+  text-align: center;
+  font-weight: bold;
+  color: #000000;
+  font-family: 'HacenTunisia', Arial, sans-serif;
+  white-space: normal;
+  word-wrap: break-word;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dataRows {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #000000;
+  border-right: 1px solid #000000;
+}
+
+.dataCell {
+  border-bottom: 1px solid #000000;
+  border-left: 1px solid #000000;
+  border-right: 1px solid #000000;
+  padding: 2px 4px;
+  background-color: #ffffff;
+  color: #000000;
+  font-size: 14px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.dataCell.delayed {
+  background-color: #d3d3d3;
+  color: #000000;
+}
+
+.dataRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  gap: 0;
+  overflow: hidden;
+}
+
+.guardName {
+  display: inline-block;
+  text-align: left;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.time {
+  display: inline-block;
+  text-align: right;
+  font-weight: 500;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+  color: #000000;
+}
+
+.time.delayedText {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.pointFooter {
+  border: 1px solid #000000;
+  border-top: 2px solid #000000;
+  padding: 8px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  background-color: #f5f5f5;
+  color: #000000;
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pointColumn {
+    min-width: 100px;
+    width: 100px;
+  }
+
+  .pointHeader {
+    font-size: 12px;
+    padding: 6px 2px;
+  }
+
+  .dataCell {
+    font-size: 12px;
+    padding: 3px;
+  }
+
+  .time {
+    font-size: 11px;
+    min-width: 40px;
+  }
+}
+

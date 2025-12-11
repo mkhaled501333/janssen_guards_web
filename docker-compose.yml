@@ -1,0 +1,97 @@
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: janssen-guard-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_USER=${MYSQL_USER:-janssen}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-password}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-janssen_guard}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"  # External port 3307, internal port 3306 (backend uses service name 'db')
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  api:
+    build:
+      context: ./janssen-guard-api
+      dockerfile: Dockerfile
+    container_name: janssen-guard-api
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      - DATABASE_URL=mysql+aiomysql://${MYSQL_USER:-janssen}:${MYSQL_PASSWORD:-password}@db:3306/${MYSQL_DATABASE:-janssen_guard}
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - IMAGE_STORAGE_PATH=/app/storage/images
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,https://localhost:443,https://localhost}
+    volumes:
+      - ./janssen-guard-api/storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: janssen-guard-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL:-https://localhost:8443}
+    depends_on:
+      - api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # SSL Proxy (HTTPS on 443 -> HTTP on 3000, HTTPS on 8443 -> HTTP on 8000)
+  ssl-proxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: janssen-guard-ssl-proxy
+    ports:
+      - "${HTTPS_PORT:-443}:443"
+      - "${API_HTTPS_PORT:-8443}:8443"
+    depends_on:
+      - frontend
+      - api
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-check-certificate --quiet --tries=1 --spider https://localhost:443 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  default:
+    name: janssen-guard-network
+
